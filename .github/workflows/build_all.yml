@@ -71,7 +71,18 @@ jobs:
           wget -q https://github.com/ZyCromerZ/Clang/releases/download/16.0.6-20260807-release/Clang-16.0.6-20260807.tar.gz
           tar -zxvf Clang-16.0.6-20260807.tar.gz
 
+      - name: Enable NFC & SUSFS Options
+        run: |
+          DEFCONFIG=arch/arm64/configs/${{ matrix.device }}_defconfig
+          sed -i 's/^# CONFIG_NFC is not set/CONFIG_NFC=y/' $DEFCONFIG
+          if ! grep -q '^CONFIG_NFC=y' $DEFCONFIG; then echo 'CONFIG_NFC=y' >> $DEFCONFIG; fi
+          for opt in KSU_SUSFS_SUS_PATH KSU_SUSFS_SUS_MOUNT KSU_SUSFS_SUS_KSTAT KSU_SUSFS_SPOOF_UNAME KSU_SUSFS_ENABLE_LOG KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG KSU_SUSFS_OPEN_REDIRECT KSU_SUSFS_SUS_MAP; do
+            if ! grep -q "^CONFIG_${opt}=y" $DEFCONFIG; then echo "CONFIG_${opt}=y" >> $DEFCONFIG; fi
+          done
+          echo "Enabled NFC core + full SUSFS options in $DEFCONFIG"
+
       - name: Run Build Script
+
         run: |
           chmod +x build_kernel.sh
           
