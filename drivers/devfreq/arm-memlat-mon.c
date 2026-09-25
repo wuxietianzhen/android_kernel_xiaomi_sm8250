@@ -758,6 +758,16 @@ unlock_out:
 static int arm_memlat_mon_driver_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
+
+	/*
+	 * Disable memlat monitor to fix kernel panic:
+	 * memlat_monitor_work() reads a freed perf_event (use-after-free),
+	 * crashing at perf_event_read_value -> perf_event_ctx_lock_nested.
+	 * This monitor only assists DDR bandwidth CPUfreq voting; disabling
+	 * it has no impact on core functionality.
+	 */
+	return -ENODEV;
+
 	int ret = 0;
 	const struct memlat_mon_spec *spec = of_device_get_match_data(dev);
 	enum mon_type type = NUM_MON_TYPES;
