@@ -82,6 +82,10 @@ jobs:
           if ! grep -q "^CONFIG_${opt}=y" $DEFCONFIG; then echo "CONFIG_${opt}=y" >> $DEFCONFIG; fi
         done
         echo "Enabled NFC core + full SUSFS options in $DEFCONFIG"
+        # Fix kernel panic (perf_event UAF in arm-memlat-mon): disable memlat monitor
+        sed -i 's/^CONFIG_ARM_MEMLAT_MON=y/# CONFIG_ARM_MEMLAT_MON is not set/' $DEFCONFIG
+        sed -i 's/^CONFIG_DEVFREQ_GOV_MEMLAT=y/# CONFIG_DEVFREQ_GOV_MEMLAT is not set/' $DEFCONFIG
+        echo "Disabled memlat (fix kernel panic)"
 
     - name: Run Build Script
 
